@@ -1,0 +1,206 @@
+{
+  "extName": {
+    "message": "Менеджер Задач",
+    "description": "Название расширения в Chrome Web Store и на панели инструментов"
+  },
+  "extDescription": {
+    "message": "Список задач в боковой панели Chrome: приоритеты, фильтры, поиск, экспорт и импорт. Без аккаунта и сети.",
+    "description": "Короткое описание расширения"
+  },
+  "commandOpenPanel": {
+    "message": "Открыть или закрыть боковую панель",
+    "description": "Описание горячей клавиши"
+  },
+  "appTitle": {
+    "message": "Задачи"
+  },
+  "headerMenu": {
+    "message": "Ещё"
+  },
+  "headerCompactOn": {
+    "message": "Обычный вид"
+  },
+  "headerCompactOff": {
+    "message": "Компактный вид"
+  },
+  "formPlaceholder": {
+    "message": "Новая задача…"
+  },
+  "formPlaceholderEdit": {
+    "message": "Изменить задачу…"
+  },
+  "formAdd": {
+    "message": "Добавить"
+  },
+  "formSave": {
+    "message": "Сохранить"
+  },
+  "formCancel": {
+    "message": "Отмена"
+  },
+  "searchPlaceholder": {
+    "message": "Поиск по задачам…"
+  },
+  "searchClear": {
+    "message": "Очистить поиск"
+  },
+  "filterAll": {
+    "message": "Все"
+  },
+  "filterActive": {
+    "message": "Активные"
+  },
+  "filterCompleted": {
+    "message": "Готово"
+  },
+  "taskToggleOff": {
+    "message": "Отметить выполненной"
+  },
+  "taskToggleOn": {
+    "message": "Вернуть в активные"
+  },
+  "taskPrioritySet": {
+    "message": "Высокий приоритет"
+  },
+  "taskPriorityUnset": {
+    "message": "Снять приоритет"
+  },
+  "taskPriorityBadge": {
+    "message": "важно"
+  },
+  "taskCopy": {
+    "message": "Копировать текст"
+  },
+  "taskEdit": {
+    "message": "Изменить"
+  },
+  "taskDelete": {
+    "message": "Удалить"
+  },
+  "taskDrag": {
+    "message": "Перетащить задачу"
+  },
+  "emptyNone": {
+    "message": "Пока нет задач. Добавьте первую — панель всегда под рукой."
+  },
+  "emptyFilter": {
+    "message": "Под этот фильтр задач нет."
+  },
+  "emptySearch": {
+    "message": "Ничего не найдено."
+  },
+  "listLabel": {
+    "message": "Список задач"
+  },
+  "toastTaskDeleted": {
+    "message": "Задача удалена"
+  },
+  "toastCleared": {
+    "message": "Убрано выполненных: $1"
+  },
+  "toastCopied": {
+    "message": "Скопировано"
+  },
+  "toastCopyFailed": {
+    "message": "Не удалось скопировать"
+  },
+  "toastUndo": {
+    "message": "Отменить"
+  },
+  "toastImported": {
+    "message": "Загружено задач: $1"
+  },
+  "toastImportedSkipped": {
+    "message": "Загружено: $1, пропущено: $2"
+  },
+  "toastImportFailed": {
+    "message": "Не удалось прочитать файл"
+  },
+  "toastImportEmpty": {
+    "message": "В файле нет задач"
+  },
+  "toastMigrated": {
+    "message": "Перенесено задач: $1"
+  },
+  "toastExported": {
+    "message": "Файл сохранён"
+  },
+  "errorStorageWrite": {
+    "message": "Не удалось сохранить: хранилище недоступно или переполнено"
+  },
+  "errorStorageRead": {
+    "message": "Не удалось прочитать сохранённые задачи"
+  },
+  "errorTooManyTasks": {
+    "message": "Достигнут лимит задач: $1"
+  },
+  "errorPanelRestricted": {
+    "message": "На этой странице Chrome панель открыть нельзя"
+  },
+  "errorPanelOpen": {
+    "message": "Не удалось открыть панель"
+  },
+  "errorPanelClose": {
+    "message": "Не удалось закрыть панель"
+  },
+  "dialogDeleteTitle": {
+    "message": "Удалить задачу?"
+  },
+  "dialogDeleteBody": {
+    "message": "Задачу можно вернуть кнопкой «Отменить» в уведомлении."
+  },
+  "dialogImportTitle": {
+    "message": "Заменить список задач?"
+  },
+  "dialogImportBody": {
+    "message": "Из файла будет загружено задач: $1. Текущий список заменится."
+  },
+  "menuExport": {
+    "message": "Сохранить в файл"
+  },
+  "menuImport": {
+    "message": "Загрузить из файла"
+  },
+  "menuClearCompleted": {
+    "message": "Убрать выполненные"
+  },
+  "menuHint": {
+    "message": "Данные хранятся только в этом браузере"
+  },
+  "hintKeys": {
+    "message": "Alt+A — новая задача · Alt+S — поиск · Esc — сброс"
+  },
+  "hintReorderLocked": {
+    "message": "Перестановка доступна в режиме «Все» без поиска"
+  },
+  "popupOpen": {
+    "message": "Открыть список задач"
+  },
+  "popupClose": {
+    "message": "Закрыть список задач"
+  },
+  "popupHotkeyLabel": {
+    "message": "Сочетание клавиш"
+  },
+  "popupHotkeyChange": {
+    "message": "Изменить"
+  },
+  "popupHotkeyHint": {
+    "message": "Откроется страница настроек Chrome"
+  },
+  "popupStatusOpen": {
+    "message": "Панель открыта в этом окне"
+  },
+  "popupStatusClosed": {
+    "message": "Панель закрыта в этом окне"
+  },
+  "popupCounts": {
+    "message": "Активных: $1 · Выполнено: $2"
+  },
+  "filterClearShort": {
+    "message": "Очистить"
+  },
+  "hintReorder": {
+    "message": "Перестановка: ручка, пробел и стрелки"
+  }
+}

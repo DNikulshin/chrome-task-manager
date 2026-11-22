@@ -1,39 +1,84 @@
-
-import React from 'react';
+import { useEffect, useId, useRef } from "react";
+import type { KeyboardEvent } from "react";
 
 interface Props {
-  isOpen: boolean;
-  onConfirm: () => void;
-  onCancel: () => void;
+  open: boolean;
   title: string;
   message: string;
+  confirmLabel: string;
+  cancelLabel: string;
+  tone?: "danger" | "primary";
+  onConfirm: () => void;
+  onCancel: () => void;
 }
 
-export const ConfirmDialog: React.FC<Props> = ({ isOpen, onConfirm, onCancel, title, message }) => {
-  if (!isOpen) {
-    return null;
-  }
+const FOCUSABLE = 'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
+/**
+ * Модальное подтверждение: role="dialog" + aria-modal, ловушка фокуса,
+ * закрытие по Esc и клику по подложке, возврат фокуса на прежний элемент.
+ */
+export function ConfirmDialog({ open, title, message, confirmLabel, cancelLabel, tone = "danger", onConfirm, onCancel }: Props) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  const restoreRef = useRef<Element | null>(null);
+  const titleId = useId();
+  const messageId = useId();
+
+  useEffect(() => {
+    if (!open) return;
+    restoreRef.current = document.activeElement;
+    cancelRef.current?.focus();
+    return () => {
+      const previous = restoreRef.current;
+      if (previous instanceof HTMLElement && document.contains(previous)) previous.focus();
+    };
+  }, [open]);
+
+  if (!open) return null;
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Escape") {
+      event.stopPropagation();
+      onCancel();
+      return;
+    }
+    if (event.key !== "Tab") return;
+    const nodes = dialogRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE);
+    if (!nodes?.length) return;
+    const first = nodes[0];
+    const last = nodes[nodes.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white rounded-lg p-6 shadow-xl w-full max-w-sm mx-4">
-        <h3 className="text-lg font-bold mb-4">{title}</h3>
-        <p className="text-gray-700 mb-6">{message}</p>
-        <div className="flex justify-end gap-4">
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
-          >
-            Отмена
+    <div className="overlay" onMouseDown={(event) => event.target === event.currentTarget && onCancel()}>
+      <div
+        ref={dialogRef}
+        className="dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={messageId}
+        onKeyDown={handleKeyDown}
+      >
+        <h2 id={titleId}>{title}</h2>
+        <p id={messageId}>{message}</p>
+        <div className="dialog-actions">
+          <button ref={cancelRef} type="button" className="btn btn-ghost" onClick={onCancel}>
+            {cancelLabel}
           </button>
-          <button
-            onClick={onConfirm}
-            className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
-          >
-            Удалить
+          <button type="button" className={tone === "danger" ? "btn btn-danger" : "btn btn-primary"} onClick={onConfirm}>
+            {confirmLabel}
           </button>
         </div>
       </div>
     </div>
   );
-};
+}

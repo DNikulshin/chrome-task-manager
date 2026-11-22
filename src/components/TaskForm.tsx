@@ -1,67 +1,89 @@
-import React, { useState, useEffect } from "react";
-import { Task } from "@/types";
+import { useEffect, useState } from "react";
+import type { FormEvent, KeyboardEvent, RefObject } from "react";
+import type { Task } from "@/types";
+import { MAX_TEXT } from "@/lib/tasks";
+import { t } from "@/lib/i18n";
+import { CheckIcon, PlusIcon } from "@/components/icons";
 
 interface Props {
-  onSubmit: (text: string) => void;
-  editingTask: Task | null;
+  editing: Task | null;
+  inputRef: RefObject<HTMLInputElement | null>;
+  onSubmit: (text: string) => boolean;
   onUpdate: (id: string, text: string) => void;
-  onCancelEdit: () => void;
+  onCancel: () => void;
 }
 
-export const TaskForm: React.FC<Props> = ({
-  onSubmit,
-  editingTask,
-  onUpdate,
-  onCancelEdit,
-}) => {
+export function TaskForm({ editing, inputRef, onSubmit, onUpdate, onCancel }: Props) {
+  const isEditing = editing !== null;
   const [text, setText] = useState("");
+  const [flash, setFlash] = useState(false);
 
   useEffect(() => {
-    if (editingTask) {
-      setText(editingTask.text);
-    } else {
-      setText("");
+    setText(editing?.text ?? "");
+    if (editing) {
+      const input = inputRef.current;
+      input?.focus();
+      input?.setSelectionRange(editing.text.length, editing.text.length);
     }
-  }, [editingTask]);
+  }, [editing, inputRef]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!text.trim()) return;
-    if (editingTask) {
-      onUpdate(editingTask.id, text);
-      onCancelEdit();
-    } else {
-      onSubmit(text);
+  const submit = (event?: FormEvent<HTMLFormElement>) => {
+    event?.preventDefault();
+    const value = text.trim();
+    if (!value) {
+      setFlash(true);
+      window.setTimeout(() => setFlash(false), 400);
+      inputRef.current?.focus();
+      return;
     }
+    if (isEditing && editing) onUpdate(editing.id, value);
+    else if (!onSubmit(value)) return;
     setText("");
+    inputRef.current?.focus();
   };
 
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== "Escape") return;
+    event.preventDefault();
+    if (isEditing) onCancel();
+    else setText("");
+  };
+
+  const warn = text.length > MAX_TEXT * 0.85;
+
   return (
-    <form onSubmit={handleSubmit} className="mb-6">
-      <input
-        type="text"
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder="Новая задача..."
-        className="w-full p-3 border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
-      />
-      <div className="flex gap-2 mt-2">
-        <button
-          type="submit"
-          className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
-        >
-          {editingTask ? "Сохранить" : "Добавить"}
+    <form className="form" onSubmit={submit} data-flash={flash || undefined}>
+      <div className="field">
+        <input
+          ref={inputRef}
+          type="text"
+          name="task"
+          value={text}
+          autoComplete="off"
+          spellCheck={false}
+          maxLength={MAX_TEXT}
+          aria-label={isEditing ? t("formPlaceholderEdit") : t("formPlaceholder")}
+          placeholder={isEditing ? t("formPlaceholderEdit") : t("formPlaceholder")}
+          onChange={(event) => setText(event.target.value)}
+          onKeyDown={handleKeyDown}
+        />
+        {text.length > 0 && (
+          <span className="counter" data-warn={warn} aria-hidden="true">
+            {text.length}/{MAX_TEXT}
+          </span>
+        )}
+      </div>
+      <div className="form-actions">
+        <button type="submit" className="btn btn-primary">
+          {isEditing ? <CheckIcon size={14} /> : <PlusIcon size={14} />}
+          {isEditing ? t("formSave") : t("formAdd")}
         </button>
-        {editingTask && (
-          <button
-            type="button"
-            onClick={onCancelEdit}
-            className="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition"
-          >
-            Отмена
+        {isEditing && (
+          <button type="button" className="btn btn-ghost" onClick={onCancel}>
+            {t("formCancel")}
           </button>
         )}
       </div>
     </form>
   );
-};
+}

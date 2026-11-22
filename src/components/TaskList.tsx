@@ -1,24 +1,48 @@
-import React from "react";
-import { Task } from "@/types";
-import { TaskItem } from "./TaskItem";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import type { Task } from "@/types";
+import { t } from "@/lib/i18n";
+import { ClipboardIcon } from "@/components/icons";
+import { TaskItem } from "@/components/TaskItem";
 
 interface Props {
   tasks: Task[];
+  query: string;
+  canReorder: boolean;
+  emptyMessage: string;
+  onToggle: (id: string) => void;
+  onTogglePriority: (id: string) => void;
   onEdit: (task: Task) => void;
-  onDelete: (id: string) => void;
+  onDelete: (task: Task) => void;
+  onCopy: (task: Task) => void;
 }
 
-export const TaskList: React.FC<Props> = ({ tasks, onEdit, onDelete }) => {
+export function TaskList({ tasks, query, canReorder, emptyMessage, onToggle, onTogglePriority, onEdit, onDelete, onCopy }: Props) {
+  if (!tasks.length) {
+    return (
+      <div className="empty">
+        <ClipboardIcon size={28} />
+        <p>{emptyMessage}</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-3">
-      {tasks.map((task) => (
-        <TaskItem
-          key={task.id}
-          task={task}
-          onEdit={onEdit}
-          onDelete={onDelete}
-        />
-      ))}
-    </div>
+    <SortableContext items={tasks.map((task) => task.id)} strategy={verticalListSortingStrategy}>
+      <ul className="task-list" aria-label={t("listLabel")}>
+        {tasks.map((task) => (
+          <TaskItem
+            key={task.id}
+            task={task}
+            query={query}
+            canReorder={canReorder}
+            onToggle={onToggle}
+            onTogglePriority={onTogglePriority}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onCopy={onCopy}
+          />
+        ))}
+      </ul>
+    </SortableContext>
   );
-};
+}

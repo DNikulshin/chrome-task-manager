@@ -1,120 +1,123 @@
-import { useEffect, useState, lazy, Suspense } from "react";
+import { useEffect, useState } from "react";
+import { closePanel, describeOpenError, openPanel } from "@/lib/panel";
+import { KEYS } from "@/lib/storageKeys";
+import { countTasks } from "@/lib/tasks";
+import { t } from "@/lib/i18n";
+import type { Task } from "@/types";
 
-const HotkeyRecorder = lazy(() =>
-  import("@/components/HotkeyRecorder").then((module) => ({
-    default: module.HotkeyRecorder,
-  }))
-);
+interface PanelState {
+  windows: number[];
+  isOpen: boolean;
+}
 
-function App() {
-  const [currentShortcut, setCurrentShortcut] = useState("Ctrl+B");
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
+export default function App() {
+  const [shortcut, setShortcut] = useState("Ctrl+B");
+  const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [counts, setCounts] = useState({ active: 0, completed: 0 });
 
   useEffect(() => {
-    // 1. Получаем текущую горячую клавишу
     chrome.commands.getAll((commands) => {
-      const cmd = commands.find((c) => c.name === "open-sidepanel");
-      if (cmd?.shortcut) {
-        setCurrentShortcut(cmd.shortcut);
-      }
+      const command = commands.find((item) => item.name === "open-panel");
+      if (command?.shortcut) setShortcut(command.shortcut);
     });
 
-    // 2. Спрашиваем Service Worker, открыта ли панель прямо сейчас
-    chrome.runtime.sendMessage({ type: "GET_PANEL_STATUS" }, (response) => {
-      if (chrome.runtime.lastError) return;
-      if (response) setIsPanelOpen(response.isOpen);
+    chrome.storage.local.get(KEYS.tasks).then((stored) => {
+      const tasks = Array.isArray(stored[KEYS.tasks]) ? (stored[KEYS.tasks] as Task[]) : [];
+      const totals = countTasks(tasks);
+      setCounts({ active: totals.active, completed: totals.completed });
     });
 
-    // 3. Слушаем обновления статуса от Service Worker в реальном времени
-    const statusListener = (message: any) => {
-      if (message.type === "PANEL_STATUS") {
-        setIsPanelOpen(message.isOpen);
-      }
+    void chrome.tabs.query({ active: true, currentWindow: true }).then(([tab]) => {
+      if (!tab?.windowId) return;
+      chrome.runtime.sendMessage({ type: "panel:get-state", windowId: tab.windowId }).then(
+        (state: PanelState | undefined) => setIsOpen(Boolean(state?.isOpen)),
+        () => setIsOpen(false),
+      );
+    });
+
+    const onMessage = (message: { type?: string; windows?: number[] }) => {
+      if (message?.type !== "panel:state" || !Array.isArray(message.windows)) return;
+      void chrome.tabs.query({ active: true, currentWindow: true }).then(([tab]) => {
+        if (tab?.windowId) setIsOpen(message.windows!.includes(tab.windowId));
+      });
     };
-    chrome.runtime.onMessage.addListener(statusListener);
-
-    return () => chrome.runtime.onMessage.removeListener(statusListener);
+    chrome.runtime.onMessage.addListener(onMessage);
+    return () => chrome.runtime.onMessage.removeListener(onMessage);
   }, []);
 
-  const handleTogglePanel = async () => {
+  const toggle = async () => {
+    if (busy) return;
+    setBusy(true);
     setError(null);
-
-    // Получаем активную вкладку, чтобы знать tabId и windowId
-    const [tab] = await chrome.tabs.query({
-      active: true,
-      currentWindow: true,
-    });
-
-    if (!tab?.id || !tab?.windowId) return;
-
-    if (isPanelOpen) {
-      // ЗАКРЫТИЕ: обязательно передаем windowId
-      try {
-        await chrome.sidePanel.close({ windowId: tab.windowId });
-        // Состояние обновится само через слушатель PANEL_STATUS
-      } catch (err) {
-        console.error("Ошибка при закрытии:", err);
-        setError("Не удалось закрыть панель");
-      }
-    } else {
-      // ОТКРЫТИЕ: проверяем, не системная ли это страница
-      const isSystemPage =
-        tab.url?.startsWith("chrome://") || tab.url?.startsWith("edge://");
-
-      if (isSystemPage) {
-        setError("Панель недоступна на этой странице");
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!tab?.id || tab.windowId === undefined) {
+        setError(t("errorPanelOpen"));
         return;
       }
-
-      try {
-        await chrome.sidePanel.open({ tabId: tab.id });
-        // Закрываем popup, чтобы не мешал обзору
-        window.close();
-      } catch (err) {
-        console.error("Ошибка при открытии:", err);
-        setError("Ошибка запуска панели");
+      if (isOpen) {
+        await closePanel({ windowId: tab.windowId, tabId: tab.id });
+        setIsOpen(false);
+        return;
       }
+      try {
+        await openPanel(tab.id);
+        setIsOpen(true);
+        window.close();
+      } catch (cause) {
+        const reason = describeOpenError(cause);
+        setError(reason === "restricted" ? t("errorPanelRestricted") : t("errorPanelOpen"));
+        console.warn("sidePanel.open failed", cause);
+      }
+    } catch (cause) {
+      if (isOpen) setError(t("errorPanelClose"));
+      else setError(t("errorPanelOpen"));
+      console.warn("panel toggle failed", cause);
+    } finally {
+      setBusy(false);
     }
   };
 
   return (
-    <div className="w-64 p-4 bg-linear-to-br from-indigo-100 to-purple-100 rounded-lg shadow-xl">
-      <button
-        onClick={handleTogglePanel}
-        className={`w-full py-2 px-4 rounded-lg text-white font-medium transition transform hover:scale-105 flex items-center justify-center gap-2 shadow-md ${
-          isPanelOpen
-            ? "bg-red-500 hover:bg-red-600"
-            : "bg-indigo-600 hover:bg-indigo-700"
-        }`}
-      >
-        <span>📋</span>
-        {isPanelOpen ? "Закрыть список задач" : "Открыть список задач"}
+    <div className="popup">
+      <div className="popup-head">
+        <h1 className="popup-title">{t("extName")}</h1>
+      </div>
+
+      <button type="button" className="popup-toggle" data-open={isOpen} onClick={toggle} aria-busy={busy}>
+        {isOpen ? t("popupClose") : t("popupOpen")}
       </button>
 
+      <p className="popup-status" role="status">
+        {isOpen ? t("popupStatusOpen") : t("popupStatusClosed")}
+      </p>
+
       {error && (
-        <p className="text-[11px] text-red-600 mt-2 text-center font-medium animate-pulse">
+        <p className="popup-error" role="alert">
           {error}
         </p>
       )}
 
-      <div className="mt-4 border-t border-indigo-200 pt-3">
-        <Suspense
-          fallback={
-            <div className="text-xs text-gray-400 mt-2">Загрузка...</div>
-          }
-        >
-          <HotkeyRecorder currentShortcut={currentShortcut} />
-        </Suspense>
-      </div>
+      <p className="popup-status">{t("popupCounts", [String(counts.active), String(counts.completed)])}</p>
 
-      <p className="text-[10px] text-gray-500 mt-3 text-center italic">
-        {isPanelOpen
-          ? "Панель активна в правой части экрана"
-          : "Нажмите кнопку или горячую клавишу"}
-      </p>
+      <div className="popup-section">
+        <p className="popup-label">{t("popupHotkeyLabel")}</p>
+        <div className="popup-hotkey">
+          <kbd>{shortcut}</kbd>
+          <button
+            type="button"
+            className="popup-link"
+            onClick={() => chrome.tabs.create({ url: "chrome://extensions/shortcuts" })}
+          >
+            {t("popupHotkeyChange")}
+          </button>
+        </div>
+        <p className="popup-label" style={{ marginTop: 6 }}>
+          {t("popupHotkeyHint")}
+        </p>
+      </div>
     </div>
   );
 }
-
-export default App;

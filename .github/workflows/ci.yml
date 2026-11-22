@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    name: Типы, тесты, сборка, статика
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - run: npm run validate
+      - name: Отчёт о проверках
+        run: npm run report
+      - uses: actions/upload-artifact@v4
+        with:
+          name: extension-package
+          path: release/*.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: report
+          path: artifacts/
+
+  browser:
+    name: Браузерные проверки (Chrome for Testing)
+    runs-on: ubuntu-latest
+    needs: verify
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Установить Chrome for Testing
+        run: npx --yes @puppeteer/browsers install chrome@stable --path .browsers
+      - name: Найти бинарь Chrome
+        run: |
+          CHROME_BIN=$(find .browsers/chrome -type f -path '*chrome-linux64/chrome' | head -1)
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          "$CHROME_BIN" --version
+      # Скрипты передают --no-sandbox и сами ищут CHROME_BIN.
+      - run: npm run load-test
+      - run: npm run e2e
+      - name: Отчёт о проверках
+        if: always()
+        run: npm run report
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-artifacts
+          path: artifacts/
+
+  package:
+    name: Zip для Chrome Web Store
+    runs-on: ubuntu-latest
+    needs: verify
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm run validate
+      - uses: actions/upload-artifact@v4
+        with:
+          name: chrome-web-store-zip
+          path: release/*.zip
+          retention-days: 30

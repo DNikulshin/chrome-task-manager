@@ -1,0 +1,206 @@
+{
+  "extName": {
+    "message": "Task Manager",
+    "description": "Extension name in the Chrome Web Store and on the toolbar"
+  },
+  "extDescription": {
+    "message": "Task list in Chrome's side panel: priorities, filters, search, export and import. No account, no network.",
+    "description": "Short extension description"
+  },
+  "commandOpenPanel": {
+    "message": "Open or close the side panel",
+    "description": "Keyboard shortcut description"
+  },
+  "appTitle": {
+    "message": "Tasks"
+  },
+  "headerMenu": {
+    "message": "More"
+  },
+  "headerCompactOn": {
+    "message": "Comfortable view"
+  },
+  "headerCompactOff": {
+    "message": "Compact view"
+  },
+  "formPlaceholder": {
+    "message": "New task…"
+  },
+  "formPlaceholderEdit": {
+    "message": "Edit task…"
+  },
+  "formAdd": {
+    "message": "Add"
+  },
+  "formSave": {
+    "message": "Save"
+  },
+  "formCancel": {
+    "message": "Cancel"
+  },
+  "searchPlaceholder": {
+    "message": "Search tasks…"
+  },
+  "searchClear": {
+    "message": "Clear search"
+  },
+  "filterAll": {
+    "message": "All"
+  },
+  "filterActive": {
+    "message": "Active"
+  },
+  "filterCompleted": {
+    "message": "Done"
+  },
+  "taskToggleOff": {
+    "message": "Mark as done"
+  },
+  "taskToggleOn": {
+    "message": "Move back to active"
+  },
+  "taskPrioritySet": {
+    "message": "High priority"
+  },
+  "taskPriorityUnset": {
+    "message": "Clear priority"
+  },
+  "taskPriorityBadge": {
+    "message": "important"
+  },
+  "taskCopy": {
+    "message": "Copy text"
+  },
+  "taskEdit": {
+    "message": "Edit"
+  },
+  "taskDelete": {
+    "message": "Delete"
+  },
+  "taskDrag": {
+    "message": "Drag task"
+  },
+  "emptyNone": {
+    "message": "No tasks yet. Add the first one — the panel is always one click away."
+  },
+  "emptyFilter": {
+    "message": "Nothing matches this filter."
+  },
+  "emptySearch": {
+    "message": "Nothing found."
+  },
+  "listLabel": {
+    "message": "Task list"
+  },
+  "toastTaskDeleted": {
+    "message": "Task deleted"
+  },
+  "toastCleared": {
+    "message": "Removed completed: $1"
+  },
+  "toastCopied": {
+    "message": "Copied"
+  },
+  "toastCopyFailed": {
+    "message": "Could not copy"
+  },
+  "toastUndo": {
+    "message": "Undo"
+  },
+  "toastImported": {
+    "message": "Tasks imported: $1"
+  },
+  "toastImportedSkipped": {
+    "message": "Imported: $1, skipped: $2"
+  },
+  "toastImportFailed": {
+    "message": "Could not read the file"
+  },
+  "toastImportEmpty": {
+    "message": "The file has no tasks"
+  },
+  "toastMigrated": {
+    "message": "Tasks migrated: $1"
+  },
+  "toastExported": {
+    "message": "File saved"
+  },
+  "errorStorageWrite": {
+    "message": "Could not save: storage is unavailable or full"
+  },
+  "errorStorageRead": {
+    "message": "Could not read saved tasks"
+  },
+  "errorTooManyTasks": {
+    "message": "Task limit reached: $1"
+  },
+  "errorPanelRestricted": {
+    "message": "The panel cannot be opened on this Chrome page"
+  },
+  "errorPanelOpen": {
+    "message": "Could not open the panel"
+  },
+  "errorPanelClose": {
+    "message": "Could not close the panel"
+  },
+  "dialogDeleteTitle": {
+    "message": "Delete this task?"
+  },
+  "dialogDeleteBody": {
+    "message": "You can bring it back with Undo in the notification."
+  },
+  "dialogImportTitle": {
+    "message": "Replace the task list?"
+  },
+  "dialogImportBody": {
+    "message": "The file contains $1 tasks. The current list will be replaced."
+  },
+  "menuExport": {
+    "message": "Save to file"
+  },
+  "menuImport": {
+    "message": "Load from file"
+  },
+  "menuClearCompleted": {
+    "message": "Remove completed"
+  },
+  "menuHint": {
+    "message": "Data stays in this browser only"
+  },
+  "hintKeys": {
+    "message": "Alt+A — new task · Alt+S — search · Esc — reset"
+  },
+  "hintReorderLocked": {
+    "message": "Reordering works in All view without search"
+  },
+  "popupOpen": {
+    "message": "Open task list"
+  },
+  "popupClose": {
+    "message": "Close task list"
+  },
+  "popupHotkeyLabel": {
+    "message": "Shortcut"
+  },
+  "popupHotkeyChange": {
+    "message": "Change"
+  },
+  "popupHotkeyHint": {
+    "message": "Opens the Chrome shortcuts page"
+  },
+  "popupStatusOpen": {
+    "message": "Panel is open in this window"
+  },
+  "popupStatusClosed": {
+    "message": "Panel is closed in this window"
+  },
+  "popupCounts": {
+    "message": "Active: $1 · Done: $2"
+  },
+  "filterClearShort": {
+    "message": "Clear"
+  },
+  "hintReorder": {
+    "message": "Reorder: handle, Space and arrows"
+  }
+}
